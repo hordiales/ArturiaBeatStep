@@ -1,10 +1,25 @@
-ArturiaBeatStep
+MIDI Controller Class for SuperCollider
 ===============
 
-Controller class for Arturia BeatStep, mapped to factory defaults (actual controller defaults, which differ from the data sheet).
+Based in Controller class for Arturia BeatStep, mapped to factory defaults (actual controller defaults, which differ from the data sheet).
+
+Install:
+-----
+Copy MCClass.sc to SuperCollider Extensions folder and recompile class library from scide or command line.
+
 
 Basic usage
 -----------
+
+
+```
+~mpkmidimix = AkaiMidiMix();
+~irigpad = IRigPads(); 
+
+//master volume (SC in DB)
+v = s.volume;
+~irigpad.knob4.onChange = {|val| v.volume = val.linlin(0, 127, -10, 10) };
+```
 
 ```
 a = ArturiaBeatStep();

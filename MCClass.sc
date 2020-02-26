@@ -1,15 +1,17 @@
 // =======================================================
-// Title         :  iRig PADS, MPK mini, AkaiMidiMix, etc based on ArturiaBeatStep (by David Granström 2015)
-// Description   : Controller class for iRig PADS
-// Version       :
+// Title         :  iRig PADS, MPK mini, AkaiMidiMix, etc based on ArturiaBeatStep
+// Description   : Controller class for iRig PADS, AkaiMidiMix
+// Version       :  Modificado por hordia 2017, 2018
 // Copyright (c) : basado en código de "https://github.com/davidgranstrom/ArturiaBeatStep"
 // =======================================================
 
+//TODO: connect only the selected device
+
 AkaiMidiMix {
-	var <knobs, <recpads, <mutepads;
+	var <master, <knobsA, <knobsB, <knobsC, <sliders, <recpads, <mutepads, <bankLeft, <bankRight, <solo;
 
     var ctls;
-    var knobValues, muteValues, recValues, extraValues;
+    var knobAValues, knobBValues, knobCValues, sliderValues, muteValues, recValues, masterValue, bankLeftValue, bankRightValue, soloValue;
 
     *new {
         ^super.new.init;
@@ -18,20 +20,26 @@ AkaiMidiMix {
     init {
         ctls = ();
 
-        knobs = List[];
+		bankLeft = List[];
+		bankRight = List[];
+        master = List[];
+		solo = List[];
+
+		knobsA = List[];
+		knobsB = List[];
+		knobsC = List[];
+		sliders = List[];
+
 		mutepads  = List[];
         recpads  = List[];
 
+
         //Knobs: Row 1,2,3
 		//Slides: Row 4
-		//master slide: 62
-	    knobValues = [
-			16,20,24,28,46,50,54,58,
-			17,21,25,29,47,51,55,59,
-			18,22,26,30,48,52,56,60,
-			19,23,27,31,49,53,57,61,
-			62
-		];
+	    knobAValues = [ 16,20,24,28,46,50,54,58 ];
+		knobBValues = [ 17,21,25,29,47,51,55,59 ];
+		knobCValues = [ 18,22,26,30,48,52,56,60 ];
+		sliderValues  = [ 19,23,27,31,49,53,57,61 ];
 
 		/*
 		// Row1
@@ -50,10 +58,10 @@ AkaiMidiMix {
 			3,6,9,12,15,18,21,24
 		];
 
-	    //bank left, right and mute
-		extraValues = [
-			25,26,27
-		];
+		bankLeftValue = [25];
+		bankRightValue = [26];
+		soloValue = [27];
+		masterValue = [62]; 	//MASTER slide
 
         MIDIClient.init;
         MIDIIn.connectAll;
@@ -62,11 +70,55 @@ AkaiMidiMix {
     }
 
     assignCtls {
-        knobValues.do {|cc, i|
-            var key  = ("knob" ++ (i+1)).asSymbol;
+        knobAValues.do {|cc, i|
+            var key  = ("knobA" ++ (i+1)).asSymbol;
             var knob = ABSKnob(key, cc);
-            knobs.add(knob);
+            knobsA.add(knob);
             ctls.put(key, knob);
+        };
+        knobBValues.do {|cc, i|
+            var key  = ("knobB" ++ (i+1)).asSymbol;
+            var knob = ABSKnob(key, cc);
+            knobsB.add(knob);
+            ctls.put(key, knob);
+        };
+		knobCValues.do {|cc, i|
+            var key  = ("knobC" ++ (i+1)).asSymbol;
+            var knob = ABSKnob(key, cc);
+            knobsC.add(knob);
+            ctls.put(key, knob);
+        };
+		sliderValues.do {|cc, i|
+            var key  = ("slider" ++ (i+1)).asSymbol;
+            var slider = ABSKnob(key, cc);
+            sliders.add(slider);
+            ctls.put(key, slider);
+        };
+		masterValue.do {|cc, i|
+            var key  = ("master").asSymbol;
+            var knob = ABSKnob(key, cc);
+            master.add(knob);
+            ctls.put(key, knob);
+        };
+
+		soloValue.do {|note, i|
+            var key = ("solo").asSymbol;
+            var pad = ABSPad(key, note);
+            solo.add(pad);
+            ctls.put(key, pad);
+        };
+
+		bankLeftValue.do {|note, i|
+            var key = ("bankLeft").asSymbol;
+            var pad = ABSPad(key, note);
+            bankLeft.add(pad);
+            ctls.put(key, pad);
+        };
+		bankRightValue.do {|note, i|
+            var key = ("bankRight").asSymbol;
+            var pad = ABSPad(key, note);
+            bankRight.add(pad);
+            ctls.put(key, pad);
         };
 
         muteValues.collect {|note, i|
@@ -162,8 +214,14 @@ IRigPads {
         knobs = List[];
         pads  = List[];
 
-        knobValues = [ 10, 11, 1, 7 ];
-        padValues  = [ 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63];
+        knobValues = [ 10, 11, 1, 7 ]; //knob2 CC 11 is knob2 and also expression pedal
+		padValues  = [
+			35, 36, 38, 40,
+			37, 39, 42, 44,
+			50, 45, 41, 46,
+			51, 53, 49, 52
+		];
+
 
         MIDIClient.init;
         MIDIIn.connectAll;
